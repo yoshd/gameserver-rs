@@ -1,0 +1,3 @@
+[submodule "deps/agones"]
+	path = deps/agones
+	url = https://github.com/googleforgames/agones.git

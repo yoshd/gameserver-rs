@@ -1,0 +1,33 @@
+apiVersion: agones.dev/v1
+kind: Fleet
+metadata:
+  name: game-server
+spec:
+  replicas: 2
+  template:
+    metadata:
+      name: game-server
+      generateName: game-server-
+    spec:
+      ports:
+      - name: default
+        containerPort: 10000
+        protocol: TCP
+      health:
+        initialDelaySeconds: 30
+        periodSeconds: 60
+      template:
+        spec:
+          containers:
+          - name: game-server
+            image: game-server:latest
+            imagePullPolicy: Never
+            resources:
+              limits:
+                memory: 32Mi
+                cpu: 20m
+            env:
+            - name: AGONES_SDK_GRPC_PORT
+              value: '59357'
+            - name: RUST_LOG
+              value: 'info'

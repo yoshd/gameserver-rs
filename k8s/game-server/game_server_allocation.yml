@@ -1,0 +1,5 @@
+apiVersion: allocation.agones.dev/v1
+kind: GameServerAllocation
+metadata:
+  name: game-server
+spec: {}
