@@ -1,9 +1,9 @@
 extern crate agones;
 
 use log::{debug, error, info};
-use std::thread;
 use std::time::Duration;
 use tokio::sync::mpsc;
+use tokio::time;
 
 mod entities;
 mod services;
@@ -20,6 +20,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tokio::spawn(async move {
         let mut sdk = _sdk.clone();
         info!("start health check");
+        let mut interval = time::interval(Duration::from_millis(2000));
         loop {
             match sdk.health() {
                 (s, Ok(_)) => {
@@ -31,7 +32,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     sdk = s;
                 }
             }
-            thread::sleep(Duration::from_secs(2));
+            interval.tick().await;
         }
     });
     // marking server as ready
