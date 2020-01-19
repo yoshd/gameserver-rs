@@ -1,5 +1,3 @@
-extern crate agones;
-
 use futures::StreamExt;
 use lazy_static::lazy_static;
 use log::{debug, error, info};

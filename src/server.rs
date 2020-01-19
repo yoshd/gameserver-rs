@@ -1,5 +1,3 @@
-extern crate agones;
-
 use log::{debug, error, info};
 use std::time::Duration;
 use tokio::sync::mpsc;
