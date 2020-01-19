@@ -12,7 +12,7 @@ $ docker build . --tag=game-server
 $ minikube cache delete game-server:latest && minikube cache add game-server:latest
 $ cd k8s
 # Start server
-$ kubectl apply -f game-server/fleet.yml
+$ kubectl apply -k game-server
 $ kubectl get gs
 # Allocate server
 $ kubectl apply -f game-server/game_server_allocation.yml

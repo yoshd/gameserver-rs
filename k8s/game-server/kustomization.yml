@@ -1,0 +1,3 @@
+resources:
+- fleet.yml
+- fleet_autoscaler.yml
