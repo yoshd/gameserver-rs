@@ -1,5 +1,7 @@
-use log::{debug, error, info};
+use std::env;
 use std::time::Duration;
+
+use log::{debug, error, info};
 use tokio::sync::mpsc;
 use tokio::time;
 
@@ -44,6 +46,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         services::game::run_worker(rx, _sdk).await;
     });
     // run server
-    services::game::run_server(tx, sdk.clone(), "0.0.0.0:10000").await?;
+    let address = env::var("ADDRESS").unwrap_or("0.0.0.0:10000".to_string());
+    services::game::run_server(tx, sdk.clone(), &address).await?;
     Ok(())
 }
