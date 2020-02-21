@@ -27,7 +27,5 @@ spec:
                 memory: 32Mi
                 cpu: 20m
             env:
-            - name: AGONES_SDK_GRPC_PORT
-              value: '59357'
             - name: RUST_LOG
-              value: 'info'
+              value: "info"
