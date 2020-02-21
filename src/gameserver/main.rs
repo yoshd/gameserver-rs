@@ -43,10 +43,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // run message worker
     let _sdk = sdk.clone();
     tokio::spawn(async move {
-        services::game::run_worker(rx, _sdk).await;
+        services::run_worker(rx, _sdk).await;
     });
     // run server
     let address = env::var("ADDRESS").unwrap_or("0.0.0.0:10000".to_string());
-    services::game::run_server(tx, sdk.clone(), &address).await?;
+    services::run_server(tx, sdk.clone(), &address).await?;
     Ok(())
 }

@@ -8,11 +8,11 @@ edition = "2018"
 
 [[bin]]
 name = "gameserver"
-path = "src/server.rs"
+path = "src/gameserver/main.rs"
 
 [[bin]]
-name = "gameclient"
-path = "src/client.rs"
+name = "gameserver-client"
+path = "src/examples/gameserver-client/main.rs"
 
 [dependencies]
 tonic = "0.1.0-beta.1"
