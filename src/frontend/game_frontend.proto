@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package matchmaker;
+
+service Frontend {
+  rpc CreateMatch(CreateMatchRequest) returns (stream CreateMatchResponse) {}
+}
+
+message CreateMatchRequest {
+  string player_id = 1;
+}
+
+message CreateMatchResponse {
+  GameServer game_server = 1;
+}
+
+message GameServer {
+  string address = 1;
+}

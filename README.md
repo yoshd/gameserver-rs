@@ -7,14 +7,21 @@ This is a real-time game server for multiplayer running on Agones.
 ```
 # Install Agones on your Kubernetes cluster.
 # https://agones.dev/site/docs/installation/
+# Install OpenMatch on your Kubernetes cluster.
+# https://open-match.dev/site/docs/installation/
 
-$ docker build . --tag=game-server
-$ minikube cache delete game-server:latest && minikube cache add game-server:latest
+$ make
+$ make minikube_cache_del
+$ make minikube_cache_add
 $ cd k8s
-# Start server
-$ kubectl apply -k game-server
+# Start gameserver
+$ kubectl apply -k gameserver
 $ kubectl get gs
-# Allocate server
-$ kubectl apply -f game-server/game_server_allocation.yml
-$ kubectl get gs
+$ Start matchmaker
+$ kubectl apply -k matchmaker
+
+# todo
+# run example
+$ cargo build --bin match-and-join
+$ MM_SERVER_ADDR=$(minikube ip):$(kubectl get svc frontend -o jsonpath='{.spec.ports[0].nodePort}') ./target/debug/match-and-join
 ```

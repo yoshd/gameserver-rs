@@ -1,3 +1,6 @@
 [submodule "deps/agones"]
 	path = deps/agones
 	url = https://github.com/googleforgames/agones.git
+[submodule "deps/open-match"]
+	path = deps/open-match
+	url = https://github.com/googleforgames/open-match.git
