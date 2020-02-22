@@ -1,6 +1,22 @@
 # gameserver-rs
 
-This is a real-time game server for multiplayer running on Agones.
+This is a sample implementation of a game matchmaking system and real-time game server, written in Rust.
+
+## Matchmaking
+
+The matching system uses [Open Match](https://github.com/googleforgames/open-match) and implements the following components:
+
+- [Game Frontend](https://open-match.dev/site/docs/guides/matchmaker/frontend/) implementation
+  - `src/frontend`
+- [Director](https://open-match.dev/site/docs/guides/matchmaker/director/) implementation
+  - `src/director`
+- [Match Function](https://open-match.dev/site/docs/guides/matchmaker/matchfunction/)
+  - `src/mmf`
+  - It matches players with a fixed number of players in the order they came in and assigns a game server running on the Agones
+
+## Real-time game server
+
+The implementation in `src/gameserver` is a real-time game server for multiplayer running on [Agones](https://github.com/googleforgames/agones).
 
 ## How to run on minikube
 
