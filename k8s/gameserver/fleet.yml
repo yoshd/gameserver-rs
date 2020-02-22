@@ -1,13 +1,13 @@
 apiVersion: agones.dev/v1
 kind: Fleet
 metadata:
-  name: game-server
+  name: gameserver
 spec:
   replicas: 2
   template:
     metadata:
-      name: game-server
-      generateName: game-server-
+      name: gameserver
+      generateName: gameserver-
     spec:
       ports:
       - name: default
@@ -19,12 +19,12 @@ spec:
       template:
         spec:
           containers:
-          - name: game-server
-            image: game-server:latest
+          - name: gameserver
+            image: gameserver:latest
             imagePullPolicy: Never
             resources:
               limits:
-                memory: 32Mi
+                memory: 16Mi
                 cpu: 20m
             env:
             - name: RUST_LOG

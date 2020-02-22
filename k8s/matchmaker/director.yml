@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: director
+spec:
+  selector:
+    matchLabels:
+      app: director
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: director
+    spec:
+      serviceAccount: fleet-allocator
+      containers:
+      - name: director
+        image: director
+        imagePullPolicy: Never # for local
+        env:
+        - name: KUBERNETES_SERVICE_HOST
+          value: kubernetes
+        - name: RUST_LOG
+          value: director=debug
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: fleet-allocator
+  labels:
+    app: fleet-allocator
+rules:
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create"]
+- apiGroups: ["allocation.agones.dev"]
+  resources: ["gameserverallocations"]
+  verbs: ["create"]
+- apiGroups: ["agones.dev"]
+  resources: ["fleets"]
+  verbs: ["get"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: fleet-allocator
+  labels:
+    app: fleet-allocator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: fleet-allocator
+  labels:
+    app: fleet-allocator
+subjects:
+- kind: ServiceAccount
+  name: fleet-allocator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: fleet-allocator

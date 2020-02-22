@@ -1,8 +1,8 @@
 use std::env;
 use std::time::Duration;
 
-use http::header::HeaderValue;
 use tokio::time;
+use tonic::metadata::MetadataValue;
 use tonic::transport::Channel;
 
 pub mod game {
@@ -38,15 +38,15 @@ async fn run_message_stream(
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let address = env::var("SERVER_ADDR").unwrap();
     let address = format!("http://{}", address);
-    let channel = Channel::from_shared(address)
-        .unwrap()
-        .intercept_headers(|headers| {
-            headers.insert("player_id", HeaderValue::from_static("12345"));
-        })
-        .connect()
-        .await?;
-    let mut client = game::game_client::GameClient::new(channel);
+    let channel = Channel::from_shared(address)?.connect().await?;
+    let metadata = MetadataValue::from_str("12345")?;
+    let mut client = game::game_client::GameClient::with_interceptor(
+        channel,
+        move |mut req: tonic::Request<()>| {
+            req.metadata_mut().insert("player_id", metadata.clone());
+            Ok(req)
+        },
+    );
     run_message_stream(&mut client).await?;
-
     Ok(())
 }

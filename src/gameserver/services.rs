@@ -9,7 +9,7 @@ use tonic::{transport::Server, Status};
 pub mod pb {
     tonic::include_proto!("game");
 }
-use super::super::entities;
+use super::entities;
 
 pub struct GameService {
     pub message_sender: mpsc::Sender<Result<pb::Message, tonic::Status>>,
@@ -40,7 +40,7 @@ impl pb::game_server::Game for GameService {
 
         info!("joined player. player_id: {:?}", player_id);
 
-        let player = entities::game_session::Player {
+        let player = entities::Player {
             id: player_id.to_string(),
             sender: tx.clone(),
         };
@@ -105,14 +105,14 @@ impl pb::game_server::Game for GameService {
 }
 
 lazy_static! {
-    pub static ref GAME_SESSION: Arc<RwLock<entities::game_session::GameSession<pb::Message, tonic::Status>>> =
-        Arc::new(RwLock::new(entities::game_session::GameSession::new()));
+    pub static ref GAME_SESSION: Arc<RwLock<entities::GameSession<pb::Message, tonic::Status>>> =
+        Arc::new(RwLock::new(entities::GameSession::new()));
 }
 
 // Todo: Consider a better way
 // Currently, this is done because of the following problems:
 // https://tokio-rs.github.io/tokio/doc/tokio/fn.spawn.html
-pub fn clone_players() -> Vec<entities::game_session::Player<pb::Message, tonic::Status>> {
+pub fn clone_players() -> Vec<entities::Player<pb::Message, tonic::Status>> {
     let g = match GAME_SESSION.read() {
         Ok(g) => g,
         Err(err) => panic!("failed to get lock: {:?}", err), // todo: return Result<T, E>

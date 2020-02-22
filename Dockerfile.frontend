@@ -1,0 +1,9 @@
+FROM debian:stretch
+RUN useradd -m server
+
+COPY --from=gameserver-base /home/builder/gameserver-rs/target/release/frontend /home/server/frontend
+RUN chown -R server /home/server && \
+    chmod o+x /home/server/frontend
+
+USER server
+ENTRYPOINT /home/server/frontend

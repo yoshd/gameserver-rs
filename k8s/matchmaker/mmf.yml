@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mmf
+spec:
+  selector:
+    matchLabels:
+      app: mmf
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mmf
+    spec:
+      containers:
+      - name: mmf
+        image: mmf
+        imagePullPolicy: Never # for local
+        ports:
+        - name: grpc
+          containerPort: 50502
+        env:
+        - name: RUST_LOG
+          value: matchfunction=debug
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mmf
+  labels:
+    app: mmf
+spec:
+  selector:
+    app: mmf
+  type: ClusterIP
+  ports:
+  - name: grpc
+    protocol: TCP
+    port: 50502
