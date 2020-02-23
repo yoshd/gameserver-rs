@@ -1,3 +1,5 @@
+![Rust](https://github.com/yoshd/gameserver-rs/workflows/Rust/badge.svg)
+
 # gameserver-rs
 
 This is a sample implementation of a game matchmaking system and real-time game server, written in Rust.
