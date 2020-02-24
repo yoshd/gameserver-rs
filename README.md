@@ -1,4 +1,4 @@
-![Build](https://github.com/yoshd/gameserver-rs/workflows/Build/badge.svg)
+![build](https://github.com/yoshd/gameserver-rs/workflows/build/badge.svg)
 
 # gameserver-rs
 
