@@ -1,4 +1,4 @@
-![Rust](https://github.com/yoshd/gameserver-rs/workflows/Rust/badge.svg)
+![Build](https://github.com/yoshd/gameserver-rs/workflows/Build/badge.svg)
 
 # gameserver-rs
 
