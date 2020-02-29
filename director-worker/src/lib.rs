@@ -189,11 +189,9 @@ where
         om_backend_address: String,
         k8s_namespace: String,
     ) -> anyhow::Result<Self> {
-        let client = om::backend_service_client::BackendServiceClient::connect(format!(
-            "http://{}",
-            om_backend_address
-        ))
-        .await?;
+        let om_backend_url = format!("http://{}", om_backend_address);
+        let client =
+            om::backend_service_client::BackendServiceClient::connect(om_backend_url).await?;
         Ok(OpenMatchDirector {
             gs_alloc_client: gs_alloc_client,
             om_backend_client: client,
@@ -233,6 +231,7 @@ where
         while let Some(res) = stream.message().await? {
             match res.r#match {
                 Some(m) => {
+                    let match_id = m.match_id.clone();
                     let mut ticket_ids = Vec::with_capacity(m.tickets.len());
                     for ticket in m.tickets {
                         ticket_ids.push(ticket.id.clone());
@@ -259,7 +258,7 @@ where
                         .assign_tickets(om::AssignTicketsRequest {
                             ticket_ids: ticket_ids,
                             assignment: Some(om::Assignment {
-                                connection: host + ":" + &port,
+                                connection: match_id + "," + &host + ":" + &port,
                                 extensions: HashMap::new(),
                             }),
                         })
