@@ -1,6 +1,6 @@
 use futures::StreamExt;
 use lazy_static::lazy_static;
-use log::{debug, error, info};
+use log::{error, info};
 use std::sync::Arc;
 use std::sync::RwLock;
 use tokio::sync::mpsc;
@@ -60,28 +60,22 @@ impl pb::game_server::Game for GameService {
             while let Some(msg) = stream.next().await {
                 match msg {
                     Ok(message) => {
-                        match s.send(Ok(message.clone())).await {
-                            Ok(_) => {}
-                            Err(err) => {
-                                error!("failed to send message: {:?}", err);
-                                break;
-                            }
-                        };
+                        if let Err(err) = s.send(Ok(message.clone())).await {
+                            error!("failed to send message: {:?}", err);
+                            break;
+                        }
                     }
                     Err(err) => {
                         error!("stream error: {:?}", err);
-                        match tx
+                        if let Err(err) = tx
                             .send(Err(tonic::Status::new(
                                 tonic::Code::Aborted,
                                 err.to_string(),
                             )))
                             .await
                         {
-                            Ok(_) => {}
-                            Err(err) => {
-                                error!("failed to send error message: {:?}", err);
-                            }
-                        };
+                            error!("failed to send error message: {:?}", err);
+                        }
                         break;
                     }
                 }
@@ -112,12 +106,10 @@ lazy_static! {
 // Todo: Consider a better way
 // Currently, this is done because of the following problems:
 // https://tokio-rs.github.io/tokio/doc/tokio/fn.spawn.html
-pub fn clone_players() -> Vec<entities::Player<pb::Message, tonic::Status>> {
-    let g = match GAME_SESSION.read() {
-        Ok(g) => g,
-        Err(err) => panic!("failed to get lock: {:?}", err), // todo: return Result<T, E>
-    };
-    g.players.clone()
+pub fn clone_players(
+) -> Result<Vec<entities::Player<pb::Message, tonic::Status>>, Box<dyn std::error::Error>> {
+    let g = GAME_SESSION.read()?;
+    Ok(g.players.clone())
 }
 
 pub async fn run_server(
@@ -146,34 +138,22 @@ pub async fn run_worker(
 ) {
     info!("start worker");
     while let Some(msg) = rx.recv().await {
-        match msg {
-            Ok(message) => {
-                let players = clone_players();
-                for mut player in players {
-                    match player.send_message(message.clone()).await {
-                        Ok(_) => debug!("sent message"),
-                        Err(err) => {
-                            error!("failed to send message: {:?}", err);
-                            {
-                                match GAME_SESSION.write() {
-                                    Ok(mut g) => {
-                                        g.delete_player(player.id);
-                                        if g.num_players() == 0 {
-                                            if sdk.shutdown().is_err() {
-                                                error!("agones sdk");
-                                            }
-                                        }
-                                    }
-                                    Err(err) => error!("{:?}", err),
+        if let Ok(message) = msg {
+            let players = clone_players().expect("failed to clone players from game session");
+            for mut player in players {
+                if let Err(err) = player.send_message(message.clone()).await {
+                    error!("failed to send message: {:?}", err);
+                    {
+                        if let Ok(mut g) = GAME_SESSION.write() {
+                            g.delete_player(player.id);
+                            if g.num_players() == 0 {
+                                if sdk.shutdown().is_err() {
+                                    error!("failed to shutdown agones SDK");
                                 }
                             }
                         }
-                    };
+                    }
                 }
-            }
-            Err(err) => {
-                error!("invalid message: {:?}", err);
-                continue;
             }
         }
     }
