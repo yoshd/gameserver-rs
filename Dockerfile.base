@@ -16,7 +16,5 @@ RUN mkdir -p /usr/local/go \
     && rm -f go${GO_VERSION}.linux-amd64.tar.gz
 ENV PATH $PATH:/usr/local/go/bin
 
-COPY . /home/builder/gameserver-rs
+COPY ./deps /home/builder/gameserver-rs/deps
 WORKDIR /home/builder/gameserver-rs
-
-RUN cargo build --release

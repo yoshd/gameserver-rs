@@ -12,7 +12,23 @@ jobs:
     - name: Submodule
       shell: bash
       run: git submodule update --init
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
+    - name: Build gameserver
+      run: pushd gameserver && cargo build && popd
+    - name: Run gameserver tests
+      run: pushd gameserver && cargo test && popd
+    - name: Build frontend
+      run: pushd frontend && cargo build && popd
+    - name: Run frontend tests
+      run: pushd frontend && cargo test && popd
+    - name: Build director
+      run: pushd director && cargo build && popd
+    - name: Run director tests
+      run: pushd director && cargo test && popd
+    - name: Build mmf
+      run: pushd mmf && cargo build && popd
+    - name: Run mmf tests
+      run: pushd mmf && cargo test && popd
+    - name: Build examples
+      run: pushd examples && cargo build && popd
+    - name: Run examples tests
+      run: pushd examples && cargo test && popd

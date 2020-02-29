@@ -9,16 +9,16 @@ This is a sample implementation of a game matchmaking system and real-time game 
 The matching system uses [Open Match](https://github.com/googleforgames/open-match) and implements the following components:
 
 - [Game Frontend](https://open-match.dev/site/docs/guides/matchmaker/frontend/) implementation
-  - `src/frontend`
+  - `frontend`
 - [Director](https://open-match.dev/site/docs/guides/matchmaker/director/) implementation
-  - `src/director`
+  - `director`
 - [Match Function](https://open-match.dev/site/docs/guides/matchmaker/matchfunction/)
-  - `src/mmf`
+  - `mmf`
   - It matches players with a fixed number of players in the order they came in and assigns a game server running on the Agones
 
 ## Real-time game server
 
-The implementation in `src/gameserver` is a real-time game server for multiplayer running on [Agones](https://github.com/googleforgames/agones).
+The implementation in `gameserver` is a real-time game server for multiplayer running on [Agones](https://github.com/googleforgames/agones).
 
 ## How to run on minikube
 
@@ -38,8 +38,8 @@ $ kubectl get gs
 $ Start matchmaker
 $ kubectl apply -k matchmaker
 
-# todo
 # run example
+$ cd examples
 $ cargo build --bin match-and-join
 $ MM_SERVER_ADDR=$(minikube ip):$(kubectl get svc frontend -o jsonpath='{.spec.ports[0].nodePort}') ./target/debug/match-and-join
 ```

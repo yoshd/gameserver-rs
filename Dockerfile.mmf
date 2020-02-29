@@ -1,9 +1,0 @@
-FROM debian:stretch
-RUN useradd -m server
-
-COPY --from=gameserver-base /home/builder/gameserver-rs/target/release/matchfunction /home/server/matchfunction
-RUN chown -R server /home/server && \
-    chmod o+x /home/server/matchfunction
-
-USER server
-ENTRYPOINT /home/server/matchfunction

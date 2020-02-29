@@ -1,0 +1,36 @@
+[package]
+name = "examples"
+version = "0.1.0"
+authors = ["yoshd <garlic.ba.0129@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "matchmaker-client"
+path = "src/matchmaker-client/main.rs"
+
+[[bin]]
+name = "gameserver-client"
+path = "src/gameserver-client/main.rs"
+
+[[bin]]
+name = "match-and-join"
+path = "src/match-and-join/main.rs"
+
+[dependencies]
+tonic = "0.1.1"
+bytes = "0.4"
+prost = "0.6"
+prost-types = "0.6.0"
+prost-build = "0.6.0"
+futures = { version = "0.3", default-features = false, features = ["alloc"]}
+tokio = { version = "0.2", features = ["macros", "sync", "stream", "time"] }
+async-stream = "0.2"
+rand = "0.7"
+log = "0.4.0"
+env_logger = "0.7.1"
+uuid = { version = "0.8", features = ["serde", "v4"] }
+
+[build-dependencies]
+tonic-build = "0.1.0"
