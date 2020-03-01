@@ -9,6 +9,7 @@ spec:
       name: gameserver
       generateName: gameserver-
     spec:
+      container: gameserver
       ports:
       - name: default
         containerPort: 10000
@@ -29,3 +30,15 @@ spec:
             env:
             - name: RUST_LOG
               value: "info"
+          - name: director
+            image: director:latest
+            imagePullPolicy: Never
+            resources:
+              limits:
+                memory: 16Mi
+                cpu: 20m
+            env:
+            - name: RUST_LOG
+              value: director=debug
+            - name: GS_ALLOCATION_MODE
+              value: self

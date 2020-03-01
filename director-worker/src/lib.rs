@@ -8,6 +8,8 @@ use log::debug;
 use serde::{Deserialize, Serialize};
 use tokio::time;
 
+use gameserver_client::GameServerClient;
+
 use kube::{
     api::{PostParams, RawApi},
     client::APIClient,
@@ -116,26 +118,40 @@ impl GameServerAllocationClient for AgonesGameServerAllocationClient {
     }
 }
 
-pub struct AgonesSDKSelfAllocationClient {
+pub struct AgonesSDKSelfAllocationClient<T>
+where
+    T: GameServerClient + Sync + Send,
+{
     agones_sdk: agones::Sdk,
+    gameserver_client: T,
     max_allocate: i32,
-    current_allocated: i32,
 }
 
-impl AgonesSDKSelfAllocationClient {
-    pub fn new(sdk: agones::Sdk, max_allocate: i32) -> Self {
+impl<T> AgonesSDKSelfAllocationClient<T>
+where
+    T: GameServerClient + Sync + Send,
+{
+    pub fn new(sdk: agones::Sdk, gameserver_client: T, max_allocate: i32) -> Self {
         AgonesSDKSelfAllocationClient {
             agones_sdk: sdk,
+            gameserver_client: gameserver_client,
             max_allocate: max_allocate,
-            current_allocated: 0,
         }
     }
 }
 
 #[async_trait]
-impl GameServerAllocationClient for AgonesSDKSelfAllocationClient {
+impl<T> GameServerAllocationClient for AgonesSDKSelfAllocationClient<T>
+where
+    T: GameServerClient + Sync + Send,
+{
     async fn allocate(&mut self) -> anyhow::Result<Status> {
-        if self.max_allocate >= self.current_allocated {
+        let num_matches = self
+            .gameserver_client
+            .get_number_of_matches()
+            .await
+            .map_err(|err| anyhow::anyhow!(err.to_string()))?;
+        if self.max_allocate <= num_matches {
             return Err(anyhow::anyhow!("gamesever is full"));
         }
 
@@ -157,7 +173,6 @@ impl GameServerAllocationClient for AgonesSDKSelfAllocationClient {
             name: port.name.clone(),
             port: port.port,
         };
-        self.current_allocated += 1;
         Ok(Status {
             state: status.state,
             ports: Some(vec![port]),

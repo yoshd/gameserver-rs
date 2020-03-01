@@ -3,6 +3,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &["../deps/open-match/api/frontend.proto"],
         &["../deps/open-match", "../deps/open-match/third_party"],
     )?;
-    tonic_build::compile_protos("./game_frontend.proto")?;
+    tonic_build::compile_protos("../proto/game_frontend.proto")?;
     Ok(())
 }

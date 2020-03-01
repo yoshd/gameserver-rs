@@ -1,32 +1,34 @@
 use tokio::sync::mpsc;
 
-#[derive(Clone)]
-pub struct Player<T, E> {
+#[derive(Clone, Debug)]
+pub struct Player<M, E> {
     pub id: String,
-    pub sender: mpsc::Sender<Result<T, E>>,
+    pub sender: mpsc::Sender<Result<M, E>>,
 }
 
-impl<T, E> Player<T, E> {
+impl<M, E> Player<M, E> {
     pub async fn send_message(
         &mut self,
-        message: T,
-    ) -> Result<(), mpsc::error::SendError<std::result::Result<T, E>>> {
+        message: M,
+    ) -> Result<(), mpsc::error::SendError<std::result::Result<M, E>>> {
         self.sender.send(Ok(message)).await
     }
 }
 
-pub struct GameSession<T, E> {
-    pub players: Vec<Player<T, E>>,
+pub type MatchId = String;
+
+pub struct GameSession<M, E> {
+    pub players: Vec<Player<M, E>>,
 }
 
-impl<T, E> GameSession<T, E> {
-    pub fn new() -> GameSession<T, E> {
+impl<M, E> GameSession<M, E> {
+    pub fn new() -> GameSession<M, E> {
         GameSession {
             players: Vec::new(),
         }
     }
 
-    pub fn add_player(&mut self, player: Player<T, E>) {
+    pub fn add_player(&mut self, player: Player<M, E>) {
         self.players.push(player);
     }
 
@@ -45,4 +47,21 @@ impl<T, E> GameSession<T, E> {
     pub fn num_players(&self) -> usize {
         self.players.len()
     }
+}
+
+#[derive(Clone, Debug)]
+pub struct JoinEvent<M, E> {
+    pub player: Player<M, E>,
+}
+
+#[derive(Clone, Debug)]
+pub struct LeaveEvent {
+    pub player_id: String,
+}
+
+#[derive(Clone, Debug)]
+pub struct Event<M, E> {
+    pub join: Option<JoinEvent<M, E>>,
+    pub leave: Option<LeaveEvent>,
+    pub message: Option<M>,
 }

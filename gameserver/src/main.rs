@@ -2,7 +2,6 @@ use std::env;
 use std::time::Duration;
 
 use log::{debug, error, info};
-use tokio::sync::mpsc;
 use tokio::time;
 
 mod entities;
@@ -39,14 +38,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     sdk.ready()
         .map_err(|e| format!("could not run ready(): {:?}", e))?;
 
-    let (tx, rx) = mpsc::channel(1);
-    // run message worker
-    let _sdk = sdk.clone();
-    tokio::spawn(async move {
-        services::run_worker(rx, _sdk).await;
-    });
     // run server
     let address = env::var("ADDRESS").unwrap_or("0.0.0.0:10000".to_string());
-    services::run_server(tx, sdk.clone(), &address).await?;
+    services::run_server(sdk.clone(), &address).await?;
     Ok(())
 }

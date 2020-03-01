@@ -56,13 +56,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .await
                 .unwrap()
                 .into_inner();
+            let mut match_id = "".to_string();
             let mut gs_address = "".to_string();
             while let Some(res) = stream.message().await.unwrap() {
                 println!(
                     "successful matchmakin! player_id:{}, gameserver: {:?}",
                     player_id, res.game_server
                 );
-                gs_address = format!("http://{}", res.game_server.unwrap().address);
+                let address = res.game_server.unwrap().address;
+                let address: Vec<_> = address.split(',').collect();
+                if address.len() != 2 {
+                    panic!("unexpected response");
+                }
+                match_id = address[0].to_string();
+                gs_address = format!("http://{}", address[1]);
                 break;
             }
             let channel = Channel::from_shared(gs_address)
@@ -70,11 +77,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .connect()
                 .await
                 .unwrap();
-            let metadata = MetadataValue::from_str(&player_id).unwrap();
+            let player_id = MetadataValue::from_str(&player_id).unwrap();
+            let match_id = MetadataValue::from_str(&match_id).unwrap();
             let mut client = game::game_client::GameClient::with_interceptor(
                 channel,
                 move |mut req: tonic::Request<()>| {
-                    req.metadata_mut().insert("player_id", metadata.clone());
+                    req.metadata_mut().insert("player_id", player_id.clone());
+                    req.metadata_mut().insert("match_id", match_id.clone());
                     Ok(req)
                 },
             );

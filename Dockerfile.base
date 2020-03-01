@@ -17,4 +17,7 @@ RUN mkdir -p /usr/local/go \
 ENV PATH $PATH:/usr/local/go/bin
 
 COPY ./deps /home/builder/gameserver-rs/deps
+COPY ./director-worker /home/builder/gameserver-rs/director-worker
+COPY ./gameserver-client /home/builder/gameserver-rs/gameserver-client
+COPY ./proto/game.proto /home/builder/gameserver-rs/proto/game.proto
 WORKDIR /home/builder/gameserver-rs

@@ -44,6 +44,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         channel,
         move |mut req: tonic::Request<()>| {
             req.metadata_mut().insert("player_id", metadata.clone());
+            req.metadata_mut().insert("match_id", metadata.clone());
             Ok(req)
         },
     );

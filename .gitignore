@@ -1,3 +1,4 @@
 **/target
 **/*.rs.bk
 director-worker/Cargo.lock
+gameserver-client/Cargo.lock
