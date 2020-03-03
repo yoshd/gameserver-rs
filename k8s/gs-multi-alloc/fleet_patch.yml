@@ -3,20 +3,8 @@ kind: Fleet
 metadata:
   name: gameserver
 spec:
-  replicas: 2
   template:
-    metadata:
-      name: gameserver
-      generateName: gameserver-
     spec:
-      container: gameserver
-      ports:
-      - name: default
-        containerPort: 10000
-        protocol: TCP
-      health:
-        initialDelaySeconds: 30
-        periodSeconds: 60
       template:
         spec:
           containers:
@@ -29,7 +17,7 @@ spec:
                 cpu: 20m
             env:
             - name: RUST_LOG
-              value: "info"
+              value: gameserver=debug
           - name: director
             image: director:latest
             imagePullPolicy: Never

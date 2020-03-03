@@ -32,11 +32,18 @@ $ make
 $ make minikube_cache_del
 $ make minikube_cache_add
 $ cd k8s
-# Start gameserver
-$ kubectl apply -k gameserver
-$ kubectl get gs
-$ Start matchmaker
-$ kubectl apply -k matchmaker
+
+# Start gameserver and match maker
+
+## Allocate one game server pod for one match
+$ kustomize build gs-single-alloc | kubectl apply -f -
+
+## Allocate one game server pod for multiple matches
+## The matchmaker director acts as a gameserver sidecar, allocating itself to multiple matches.
+## Workaround until this issue is supported: https://github.com/googleforgames/agones/issues/1197
+## gs-multi-alloc cannot be started at the same time as gs-single-alloc, so please delete it once
+$ kustomize build gs-single-alloc | kubectl delete -f -
+$ kustomize build gs-multi-alloc | kubectl apply -f -
 
 # run example
 $ cd examples
