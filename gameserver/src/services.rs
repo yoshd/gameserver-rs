@@ -134,13 +134,10 @@ impl pb::game_server::Game for GameService {
         &self,
         _request: tonic::Request<pb::GetServerInfoRequest>,
     ) -> Result<tonic::Response<pb::GetServerInfoResponse>, tonic::Status> {
-        let mut num_matches = 0;
-        {
-            let w = WORKER_CHANNEL_MAP
-                .read()
-                .map_err(|err| tonic::Status::new(tonic::Code::Aborted, err.to_string()))?;
-            num_matches = w.len() as i32;
-        }
+        let num_matches = match WORKER_CHANNEL_MAP.read() {
+            Ok(w) => w.len() as i32,
+            Err(err) => return Err(tonic::Status::new(tonic::Code::Aborted, err.to_string())),
+        };
         let res = pb::GetServerInfoResponse {
             number_of_matches: num_matches,
         };
