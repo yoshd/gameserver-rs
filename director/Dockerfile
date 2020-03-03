@@ -1,7 +1,12 @@
 FROM gameserver-base as builder
 
-COPY . /home/builder/gameserver-rs/director
+# for cache
+COPY Cargo.toml Cargo.lock /home/builder/gameserver-rs/director/
+RUN mkdir /home/builder/gameserver-rs/director/src && echo "fn main() {}" >> /home/builder/gameserver-rs/director/src/main.rs
 WORKDIR /home/builder/gameserver-rs/director
+RUN cargo build --release
+
+COPY . /home/builder/gameserver-rs/director
 RUN cargo build --release
 
 FROM debian:stretch
