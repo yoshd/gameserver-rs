@@ -159,11 +159,17 @@ where
             .agones_sdk
             .get_gameserver()
             .map_err(|err| anyhow::anyhow!("{:?}", err))?;
-        let status = gs.status.ok_or(anyhow::anyhow!("empty status"))?;
+        let mut status = gs.status.ok_or(anyhow::anyhow!("empty status"))?;
         if &status.state != "Allocated" {
             self.agones_sdk
                 .allocate()
                 .map_err(|err| anyhow::anyhow!("{:?}", err))?;
+            status = self
+                .agones_sdk
+                .get_gameserver()
+                .map_err(|err| anyhow::anyhow!("{:?}", err))?
+                .status
+                .ok_or(anyhow::anyhow!("empty status"))?;
         }
         let port = status
             .ports

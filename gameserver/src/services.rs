@@ -62,43 +62,37 @@ impl pb::game_server::Game for GameService {
             sender: tx.clone(),
         };
 
-        let mut wtx: mpsc::Sender<
-            Result<entities::Event<pb::Message, tonic::Status>, tonic::Status>,
-        >;
-        {
-            wtx = match WORKER_CHANNEL_MAP.write() {
-                Ok(mut w) => match w.get(match_id) {
-                    Some(wtx) => wtx.clone(),
-                    None => {
-                        let (tx, rx) = mpsc::channel(1);
-                        let sdk = self.agones_sdk.clone();
-                        let _match_id = match_id.to_string();
-                        tokio::spawn(async move {
-                            let status_manager = AgonesStatusManager { agones_sdk: sdk };
-                            let game_session = entities::GameSession::new();
-                            let mut worker =
-                                Worker::new(_match_id, status_manager, game_session, rx);
-                            if let Err(err) = worker.run().await {
-                                error!("worker error: {:?}", err);
-                            }
-                        });
-                        w.insert(match_id.to_string(), tx.clone());
-                        tx
-                    }
-                },
-                Err(err) => return Err(tonic::Status::new(tonic::Code::Aborted, err.to_string())),
-            };
-            let event = entities::Event {
-                join: Some(entities::JoinEvent {
-                    player: player.clone(),
-                }),
-                leave: None,
-                message: None,
-            };
-            wtx.send(Ok(event))
-                .await
-                .map_err(|err| tonic::Status::new(tonic::Code::Aborted, err.to_string()))?;
-        }
+        let mut wtx = match WORKER_CHANNEL_MAP.write() {
+            Ok(mut w) => match w.get(match_id) {
+                Some(wtx) => wtx.clone(),
+                None => {
+                    let (tx, rx) = mpsc::channel(1);
+                    let sdk = self.agones_sdk.clone();
+                    let _match_id = match_id.to_string();
+                    tokio::spawn(async move {
+                        let status_manager = AgonesStatusManager { agones_sdk: sdk };
+                        let game_session = entities::GameSession::new();
+                        let mut worker = Worker::new(_match_id, status_manager, game_session, rx);
+                        if let Err(err) = worker.run().await {
+                            error!("worker error: {:?}", err);
+                        }
+                    });
+                    w.insert(match_id.to_string(), tx.clone());
+                    tx
+                }
+            },
+            Err(err) => return Err(tonic::Status::new(tonic::Code::Aborted, err.to_string())),
+        };
+        let event = entities::Event {
+            join: Some(entities::JoinEvent {
+                player: player.clone(),
+            }),
+            leave: None,
+            message: None,
+        };
+        wtx.send(Ok(event))
+            .await
+            .map_err(|err| tonic::Status::new(tonic::Code::Aborted, err.to_string()))?;
 
         let stream = request.into_inner();
         tokio::spawn(async move {
@@ -113,7 +107,7 @@ impl pb::game_server::Game for GameService {
                             message: Some(message.clone()),
                         };
                         if let Err(err) = wtx.send(Ok(event)).await {
-                            error!("failed to send message: {:?}", err);
+                            error!("worker: failed to send message: {:?}", err);
                             break;
                         }
                     }
@@ -190,7 +184,7 @@ where
     }
 
     pub async fn run(&mut self) -> Result<(), Box<dyn std::error::Error>> {
-        info!("start worker");
+        info!("start worker: {}", self.match_id);
         while let Some(event) = self.rx.recv().await {
             if let Ok(event) = event {
                 if let Some(message) = event.message {
@@ -220,11 +214,11 @@ where
                             return Ok(());
                         }
                     }
-                    break;
+                    continue;
                 }
                 if let Some(join) = event.join {
                     self.game_session.add_player(join.player);
-                    break;
+                    continue;
                 }
                 if let Some(leave) = event.leave {
                     self.game_session.delete_player(leave.player_id);
@@ -244,7 +238,7 @@ where
                         }
                         return Ok(());
                     }
-                    break;
+                    continue;
                 }
             }
         }
