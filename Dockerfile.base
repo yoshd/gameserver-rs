@@ -1,4 +1,4 @@
-FROM rust:1.40.0 as builder
+FROM rust:1.41.0 as builder
 RUN useradd -m build
 
 RUN rustup component add rustfmt
@@ -16,7 +16,8 @@ RUN mkdir -p /usr/local/go \
     && rm -f go${GO_VERSION}.linux-amd64.tar.gz
 ENV PATH $PATH:/usr/local/go/bin
 
-COPY . /home/builder/gameserver-rs
+COPY ./deps /home/builder/gameserver-rs/deps
+COPY ./director-worker /home/builder/gameserver-rs/director-worker
+COPY ./gameserver-client /home/builder/gameserver-rs/gameserver-client
+COPY ./proto /home/builder/gameserver-rs/proto
 WORKDIR /home/builder/gameserver-rs
-
-RUN cargo build --release

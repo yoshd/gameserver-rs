@@ -1,0 +1,6 @@
+resources:
+- ../bases/matchmaker/frontend
+- ../bases/matchmaker/mmf
+- ../bases/gameserver
+patchesStrategicMerge:
+- fleet_patch.yml

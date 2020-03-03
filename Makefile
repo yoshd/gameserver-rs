@@ -4,16 +4,16 @@ build_base:
 	docker build . -t gameserver-base -f Dockerfile.base
 
 build_gameserver: build_base
-	docker build . -t gameserver -f Dockerfile.gameserver
+	cd gameserver; docker build . -t gameserver
 
 build_frontend: build_base
-	docker build . -t frontend -f Dockerfile.frontend
+	cd frontend; docker build . -t frontend
 
 build_director: build_base
-	docker build . -t director -f Dockerfile.director
+	cd director; docker build . -t director
 
 build_mmf: build_base
-	docker build . -t mmf -f Dockerfile.mmf
+	cd mmf; docker build . -t mmf
 
 minikube_cache_del:
 	minikube cache delete gameserver:latest

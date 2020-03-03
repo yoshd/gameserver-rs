@@ -1,0 +1,32 @@
+apiVersion: agones.dev/v1
+kind: Fleet
+metadata:
+  name: gameserver
+spec:
+  template:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: gameserver
+            image: gameserver:latest
+            imagePullPolicy: Never
+            resources:
+              limits:
+                memory: 16Mi
+                cpu: 20m
+            env:
+            - name: RUST_LOG
+              value: gameserver=debug
+          - name: director
+            image: director:latest
+            imagePullPolicy: Never
+            resources:
+              limits:
+                memory: 16Mi
+                cpu: 20m
+            env:
+            - name: RUST_LOG
+              value: director=debug
+            - name: GS_ALLOCATION_MODE
+              value: self

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package game;
+
+service Game {
+  rpc Join(stream Message) returns (stream Message) {}
+  rpc GetServerInfo(GetServerInfoRequest) returns (GetServerInfoResponse) {}
+}
+
+// Message
+message Message { bytes body = 1; }
+
+// GetServerInfoRequest
+message GetServerInfoRequest {}
+
+// GetServerInfoResponse
+message GetServerInfoResponse { int32 number_of_matches = 1; }

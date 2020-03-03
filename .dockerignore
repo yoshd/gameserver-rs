@@ -3,3 +3,9 @@
 **/target
 **/docs
 **/.github
+gameserver
+frontend
+director
+mmf
+examples
+k8s

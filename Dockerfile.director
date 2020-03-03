@@ -1,9 +1,0 @@
-FROM debian:stretch
-RUN useradd -m server
-
-COPY --from=gameserver-base /home/builder/gameserver-rs/target/release/director /home/server/director
-RUN chown -R server /home/server && \
-    chmod o+x /home/server/director
-
-USER server
-ENTRYPOINT /home/server/director
