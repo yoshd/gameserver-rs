@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::env;
+use std::time::SystemTime;
 
 use log::{debug, error, info};
 use tokio::sync::mpsc;
@@ -42,6 +43,9 @@ impl mm::frontend_server::Frontend for GameFrontend {
         let player_id = request.into_inner().player_id;
         debug!("requested: {}", player_id);
 
+        let now = SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .map_err(|err| tonic::Status::new(tonic::Code::Unknown, err.to_string()))?;
         let create_ticket_req = om::CreateTicketRequest {
             ticket: Some(om::Ticket {
                 id: "".to_string(), // auto gen by open match
@@ -52,7 +56,10 @@ impl mm::frontend_server::Frontend for GameFrontend {
                     tags: vec![],
                 }),
                 extensions: std::collections::HashMap::new(),
-                create_time: None, // todo
+                create_time: Some(prost_types::Timestamp {
+                    seconds: now.as_secs() as i64,
+                    nanos: now.subsec_nanos() as i32,
+                }),
             }),
         };
         let create_ticket_res = client
