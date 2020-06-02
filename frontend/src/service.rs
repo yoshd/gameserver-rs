@@ -52,25 +52,20 @@ impl mm::frontend_server::Frontend for GameFrontend {
                     tags: vec![],
                 }),
                 extensions: std::collections::HashMap::new(),
+                create_time: None, // todo
             }),
         };
         let create_ticket_res = client
             .create_ticket(tonic::Request::new(create_ticket_req))
             .await?;
-        let ticket = create_ticket_res
-            .into_inner()
-            .ticket
-            .ok_or(tonic::Status::new(
-                tonic::Code::Unavailable,
-                "failed to assign match request",
-            ))?;
+        let ticket = create_ticket_res.into_inner();
         debug!("created ticket: {:?}", ticket);
-        let get_assignments_res = client
-            .get_assignments(tonic::Request::new(om::GetAssignmentsRequest {
+        let watch_assignments_res = client
+            .watch_assignments(tonic::Request::new(om::WatchAssignmentsRequest {
                 ticket_id: ticket.id.clone(),
             }))
             .await?;
-        let mut inbound = get_assignments_res.into_inner();
+        let mut inbound = watch_assignments_res.into_inner();
         tokio::spawn(async move {
             while let Ok(assignment_res) = inbound.message().await {
                 let assignment = match assignment_res {

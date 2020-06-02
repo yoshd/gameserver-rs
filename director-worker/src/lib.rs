@@ -240,6 +240,8 @@ where
                     double_range_filters: vec![],
                     string_equals_filters: vec![],
                     tag_present_filters: vec![],
+                    created_before: None,
+                    created_after: None,
                 }],
                 extensions: HashMap::new(),
             }),
@@ -277,11 +279,13 @@ where
                         .to_string();
                     self.om_backend_client
                         .assign_tickets(om::AssignTicketsRequest {
-                            ticket_ids: ticket_ids,
-                            assignment: Some(om::Assignment {
-                                connection: match_id + "," + &host + ":" + &port,
-                                extensions: HashMap::new(),
-                            }),
+                            assignments: vec![om::AssignmentGroup {
+                                ticket_ids: ticket_ids,
+                                assignment: Some(om::Assignment {
+                                    connection: match_id + "," + &host + ":" + &port,
+                                    extensions: HashMap::new(),
+                                }),
+                            }],
                         })
                         .await?;
                 }
